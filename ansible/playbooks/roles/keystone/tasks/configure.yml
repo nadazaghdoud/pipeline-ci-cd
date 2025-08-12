@@ -1,0 +1,38 @@
+---
+- name: Template keystone.conf
+  template:
+    src: keystone.conf.j2
+    dest: /etc/keystone/keystone.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Sync Keystone DB
+  command: keystone-manage db_sync
+  become_user: keystone
+
+- name: Setup Fernet
+  command: keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
+
+- name: Setup credentials
+  command: keystone-manage credential_setup --keystone-user keystone --keystone-group keystone
+
+- name: Bootstrap Keystone
+  command: >
+    keystone-manage bootstrap
+    --bootstrap-password {{ keystone_admin_pass }}
+    --bootstrap-admin-url http://{{ controller_hostname }}:5000/v3/
+    --bootstrap-internal-url http://{{ controller_hostname }}:5000/v3/
+    --bootstrap-public-url http://{{ controller_hostname }}:5000/v3/
+    --bootstrap-region-id RegionOne
+
+- name: Configure ServerName in Apache
+  lineinfile:
+    path: /etc/apache2/apache2.conf
+    line: "ServerName {{ controller_hostname }}"
+
+- name: Restart Apache
+  service:
+    name: apache2
+    state: restarted
+

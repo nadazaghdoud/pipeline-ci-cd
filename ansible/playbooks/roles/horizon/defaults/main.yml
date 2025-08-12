@@ -1,0 +1,4 @@
+---
+horizon_package: openstack-dashboard
+horizon_config: /etc/openstack-dashboard/local_settings.py
+

@@ -1,0 +1,7 @@
+---
+
+- name: Reload Apache for dashboard
+  systemd:
+    name: apache2
+    state: reloaded
+

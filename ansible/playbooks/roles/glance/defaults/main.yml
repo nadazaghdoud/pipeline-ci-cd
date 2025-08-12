@@ -1,0 +1,4 @@
+---
+glance_package: glance
+glance_config: /etc/glance/glance-api.conf
+

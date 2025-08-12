@@ -1,0 +1,7 @@
+---
+- include_tasks: db.yml
+- include_tasks: install.yml
+- include_tasks: configure.yml
+- include_tasks: create_admin_openrc.yml
+
+

@@ -1,0 +1,6 @@
+---
+
+- name: Sync placement database
+  shell: |
+    su -s /bin/sh -c "placement-manage db sync" placement
+

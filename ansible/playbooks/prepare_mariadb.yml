@@ -1,0 +1,28 @@
+---
+- name: Installer et démarrer MariaDB localement
+  hosts: controller
+  become: yes
+
+  tasks:
+    - name: Installer mariadb-server
+      apt:
+        name: mariadb-server
+        state: present
+        update_cache: yes
+
+    - name: Démarrer et activer mariadb
+      systemd:
+        name: mariadb
+        state: started
+        enabled: yes
+    - name: Configurer mot de passe root et plugin mysql_native_password
+      mysql_user:
+        login_user: root
+        login_password: ''
+        name: root
+        host: localhost
+        password: "dbpass"
+        plugin: mysql_native_password
+        state: present
+        check_implicit_admin: yes
+

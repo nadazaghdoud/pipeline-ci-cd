@@ -1,0 +1,23 @@
+---
+
+- name: Create placement database
+  mysql_db:
+    name: placement
+    state: present
+
+- name: Grant access to placement@localhost
+  mysql_user:
+    name: placement
+    password: "{{ placement_db_pass }}"
+    priv: 'placement.*:ALL'
+    host: "localhost"
+    state: present
+
+- name: Grant access to placement@'%'
+  mysql_user:
+    name: placement
+    password: "{{ placement_db_pass }}"
+    priv: 'placement.*:ALL'
+    host: "%"
+    state: present
+

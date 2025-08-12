@@ -1,0 +1,10 @@
+---
+
+- name: Copy placement.conf template
+  template:
+    src: placement.conf.j2
+    dest: /etc/placement/placement.conf
+    owner: root
+    group: root
+    mode: '0644'
+

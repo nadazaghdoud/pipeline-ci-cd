@@ -1,0 +1,16 @@
+---
+- name: Install and configure Keystone
+  hosts: controller
+  become: true
+  vars_files:
+    - ../group_vars/controller.yml
+
+
+  tasks:
+    - name: Debug keystone_db_pass variable
+      debug:
+        var: keystone_db_pass
+
+  roles:
+    - keystone
+

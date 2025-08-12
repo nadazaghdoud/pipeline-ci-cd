@@ -1,0 +1,34 @@
+---
+
+- name: Load admin credentials
+  shell: source /root/admin-openrc
+  args:
+    executable: /bin/bash
+
+- name: Create placement user
+  shell: |
+    source /root/admin-openrc
+    openstack user create --domain default --password {{ placement_pass }} placement
+  register: create_placement_user
+  failed_when: false
+
+- name: Add admin role to placement user
+  shell: |
+    source /root/admin-openrc
+    openstack role add --project service --user placement admin
+
+- name: Create placement service
+  shell: |
+    source /root/admin-openrc
+    openstack service create --name placement --description "Placement API" placement
+  register: placement_service
+
+- name: Create placement endpoints (public/internal/admin)
+  shell: |
+    source /root/admin-openrc
+    openstack endpoint create --region RegionOne placement {{ item.interface }} http://controller:8778
+  loop:
+    - { interface: 'public' }
+    - { interface: 'internal' }
+    - { interface: 'admin' }
+

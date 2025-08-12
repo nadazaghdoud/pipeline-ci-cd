@@ -1,0 +1,73 @@
+pipeline {
+    agent any
+
+    environment {
+        INVENTORY = "ansible/inventory/inventory.ini"
+    }
+
+    stages {
+        stage('Test de connexion Ansible') {
+            steps {
+                dir('/home/nada/ci-cd') {
+                    sh '''
+                    echo "=== Test de ping Ansible ==="
+                    ansible -i ${INVENTORY} all -m ping -e "ansible_ssh_timeout=30"
+                    '''
+                }
+            }
+        }
+
+        stage('Déploiement Keystone') {
+            steps {
+                dir('/home/nada/ci-cd') {
+                    sh '''
+                    echo "=== Déploiement Keystone ==="
+                    ansible-playbook -i ${INVENTORY} ansible/playbooks/keystone.yml
+                    '''
+                }
+            }
+        }
+
+        stage('Déploiement Placement') {
+            steps {
+                dir('/home/nada/ci-cd') {
+                    sh '''
+                    echo "=== Déploiement Placement ==="
+                    ansible-playbook -i ${INVENTORY} ansible/playbooks/placement.yml
+                    '''
+                }
+            }
+        }
+
+        stage('Déploiement Glance') {
+            steps {
+                dir('/home/nada/ci-cd') {
+                    sh '''
+                    echo "=== Déploiement Glance ==="
+                    ansible-playbook -i ${INVENTORY} ansible/playbooks/glance.yml
+                    '''
+                }
+            }
+        }
+
+        stage('Déploiement Horizon') {
+            steps {
+                dir('/home/nada/ci-cd') {
+                    sh '''
+                    echo "=== Déploiement Horizon ==="
+                    ansible-playbook -i ${INVENTORY} ansible/playbooks/horizon.yml
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Déploiement OpenStack terminé avec succès."
+        }
+        failure {
+            echo "❌ Échec du déploiement. Vérifie les logs Jenkins."
+        }
+    }
+}v

@@ -1,0 +1,7 @@
+---
+- name: Install glance package
+  apt:
+    name: glance
+    state: present
+    update_cache: yes
+

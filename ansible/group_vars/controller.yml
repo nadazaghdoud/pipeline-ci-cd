@@ -1,0 +1,11 @@
+---
+
+keystone_db_pass: "dbkeystone"
+keystone_admin_pass: "keystoneadmin"
+controller_hostname: "controller"
+glance_db_pass: "dbglance"
+glance_pass: "glancepass"
+glance_endpoint_id: "340be3625e9b4239a6415d034e98aace"  
+mysql_root_password: "dbpass"
+
+

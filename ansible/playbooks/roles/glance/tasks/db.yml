@@ -1,0 +1,22 @@
+---
+- name: Create Glance DB
+  mysql_db:
+    name: glance
+    state: present
+
+- name: Create Glance DB user localhost
+  mysql_user:
+    name: glance
+    password: "{{ glance_db_pass }}"
+    host: "localhost"
+    priv: "glance.*:ALL"
+    state: present
+
+- name: Create Glance DB user for %
+  mysql_user:
+    name: glance
+    password: "{{ glance_db_pass }}"
+    host: "%"
+    priv: "glance.*:ALL"
+    state: present
+

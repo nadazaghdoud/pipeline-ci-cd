@@ -1,0 +1,8 @@
+---
+
+- name: Install placement-api package
+  apt:
+    name: placement-api
+    state: present
+    update_cache: yes
+

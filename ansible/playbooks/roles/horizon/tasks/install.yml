@@ -1,0 +1,8 @@
+---
+
+- name: Install Horizon package
+  apt:
+    name: openstack-dashboard
+    state: present
+    update_cache: yes
+

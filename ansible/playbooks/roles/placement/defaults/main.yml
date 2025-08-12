@@ -1,0 +1,4 @@
+---
+placement_package: placement-api
+placement_config: /etc/placement/placement.conf
+

@@ -1,0 +1,37 @@
+[database]
+connection = mysql+pymysql://glance:{{ glance_db_pass }}@{{ controller_hostname }}/glance
+
+[keystone_authtoken]
+www_authenticate_uri  = http://{{ controller_hostname }}:5000
+auth_url = http://{{ controller_hostname }}:5000
+memcached_servers = {{ controller_hostname }}:11211
+auth_type = password
+project_domain_name = Default
+user_domain_name = Default
+project_name = service
+username = glance
+password = {{ glance_pass }}
+
+[paste_deploy]
+flavor = keystone
+
+[DEFAULT]
+enabled_backends = fs:file
+use_keystone_limits = True
+
+[glance_store]
+default_backend = fs
+
+[fs]
+filesystem_store_datadir = /var/lib/glance/images/
+
+[oslo_limit]
+auth_url = http://{{ controller_hostname }}:5000
+auth_type = password
+user_domain_id = default
+username = glance
+system_scope = all
+password = {{ glance_pass }}
+endpoint_id = {{ glance_endpoint_id }}
+region_name = RegionOne
+
