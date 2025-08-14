@@ -3,10 +3,10 @@
   hosts: controller
   become: true
 
-  tasks:
-    - name: Debug keystone_db_pass variable
-      debug:
-        var: keystone_db_pass
+  vars:
+    mysql_root_password: "dbpass"
+    keystone_db_pass: "dbkeystone"
+    keystone_admin_pass: "keystoneadmin"
 
   roles:
     - keystone
