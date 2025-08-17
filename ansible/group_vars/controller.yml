@@ -1,11 +1,22 @@
----
+mariadb_root_password: rootpass
+mysql_root_password: rootpass
+keystone_db_password: keystonepass
+rabbitmq_password: rabbitpass
+keystone_admin_password: adminpass
+keystone_user_demo_password: userpass
+keystone_region: RegionOne
+controller_hostname: 10.0.0.11
+keystone_domain_name: default
+keystone_domain_desc: Default Domain
 
-keystone_db_pass: "dbkeystone"
-keystone_admin_pass: "keystoneadmin"
-controller_hostname: "controller"
-glance_db_pass: "dbglance"
-glance_pass: "glancepass"
-glance_endpoint_id: "340be3625e9b4239a6415d034e98aace"  
-mysql_root_password: "dbpass"
+placement_db_pass: "placementdbpass"
+placement_pass: "placementpass
 
+os_auth:
+  auth_url: http://10.0.0.11:5000/v3
+  username: admin
+  password: '{{ keystone_admin_password }}'
+  project_name: admin
+  user_domain_name: Default
+  project_domain_name: Default
 
