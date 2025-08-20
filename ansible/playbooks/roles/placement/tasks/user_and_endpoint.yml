@@ -1,32 +1,37 @@
 ---
 
-- name: Load admin credentials
-  shell: source /root/admin-openrc
-  args:
-    executable: /bin/bash
-
 - name: Create placement user
-  shell: |
-    source /root/admin-openrc
-    openstack user create --domain default --password {{ placement_pass }} placement
-  register: create_placement_user
-  failed_when: false
+  openstack.cloud.user:
+    name: placement
+    password: "{{ placement_pass }}"
+    default_project: service
+    state: present
+    auth: "{{ os_auth }}"
 
 - name: Add admin role to placement user
-  shell: |
-    source /root/admin-openrc
-    openstack role add --project service --user placement admin
+  openstack.cloud.user_role:
+    user: placement
+    role: admin
+    project: service
+    state: present
+    auth: "{{ os_auth }}"
 
 - name: Create placement service
-  shell: |
-    source /root/admin-openrc
-    openstack service create --name placement --description "Placement API" placement
-  register: placement_service
+  openstack.cloud.service:
+    name: placement
+    type: placement
+    description: "Placement API"
+    state: present
+    auth: "{{ os_auth }}"
 
 - name: Create placement endpoints (public/internal/admin)
-  shell: |
-    source /root/admin-openrc
-    openstack endpoint create --region RegionOne placement {{ item.interface }} http://controller:8778
+  openstack.cloud.endpoint:
+    service: placement
+    interface: "{{ item.interface }}"
+    url: "http://{{ controller_hostname }}:8778"
+    region: "{{ keystone_region }}"
+    state: present
+    auth: "{{ os_auth }}"
   loop:
     - { interface: 'public' }
     - { interface: 'internal' }
