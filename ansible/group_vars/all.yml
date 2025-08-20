@@ -10,7 +10,7 @@ keystone_domain_name: default
 keystone_domain_desc: Default Domain
 
 placement_db_pass: "placementdbpass"
-placement_pass: "placementpass
+placement_pass: "placementpass"
 
 os_auth:
   auth_url: http://10.0.0.11:5000/v3
