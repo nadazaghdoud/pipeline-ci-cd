@@ -1,6 +1,9 @@
 ---
 - hosts: controller
   become: yes
+  collections:
+    - openstack.cloud   
   roles:
     - placement
+
 
