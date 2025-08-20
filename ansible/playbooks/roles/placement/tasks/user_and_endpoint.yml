@@ -1,5 +1,4 @@
 ---
-
 - name: Create placement user
   openstack.cloud.user:
     name: placement
