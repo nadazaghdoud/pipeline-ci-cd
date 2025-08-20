@@ -2,8 +2,9 @@
 - hosts: controller
   become: yes
   collections:
-    - openstack.cloud   
+    - openstack.cloud
+  vars_files:
+    - ../group_vars/all.yml  
   roles:
     - placement
-
 
