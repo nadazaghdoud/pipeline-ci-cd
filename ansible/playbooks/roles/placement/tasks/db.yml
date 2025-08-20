@@ -1,9 +1,9 @@
----
-
 - name: Create placement database
   mysql_db:
     name: placement
     state: present
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
 
 - name: Grant access to placement@localhost
   mysql_user:
@@ -12,6 +12,8 @@
     priv: 'placement.*:ALL'
     host: "localhost"
     state: present
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
 
 - name: Grant access to placement@'%'
   mysql_user:
@@ -20,4 +22,6 @@
     priv: 'placement.*:ALL'
     host: "%"
     state: present
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
 
