@@ -27,7 +27,7 @@
   openstack.cloud.endpoint:
     auth: "{{ os_auth }}"
     service: placement
-    interface: "{{ item.interface }}"
+    endpoint_interface: "{{ item.interface }}"   
     url: "http://{{ controller_hostname }}:8778"
     region: "{{ keystone_region }}"
     state: present
