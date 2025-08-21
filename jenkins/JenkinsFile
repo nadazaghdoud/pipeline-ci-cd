@@ -2,72 +2,73 @@ pipeline {
     agent any
 
     environment {
-        INVENTORY = "ansible/inventory/inventory.ini"
+        INVENTORY = 'ansible/inventory/inventory.ini'
+        ANSIBLE_HOST_KEY_CHECKING = 'False'
+
+        // Jump (root) VM
+        JUMP_HOST = 'root@172.26.32.11'
+
+        // Target OpenStack controller VM
+        TARGET_USER = 'openstack'
+        TARGET_HOST = '10.0.0.11'
+
+        // Make sure Jenkins can find the OpenStack Ansible collection
+        ANSIBLE_COLLECTIONS_PATHS = '/var/lib/jenkins/.ansible/collections:/usr/share/ansible/collections'
     }
 
     stages {
-        stage('Test de connexion Ansible') {
+        stage('Checkout') {
             steps {
-                dir('/home/nada/ci-cd') {
-                    sh '''
-                    echo "=== Test de ping Ansible ==="
-                    ansible -i ${INVENTORY} all -m ping -e "ansible_ssh_timeout=30"
-                    '''
+                git branch: 'main', url: 'https://github.com/nadazaghdoud/pipeline-ci-cd.git'
+            }
+        }
+
+        stage('Test SSH Connection via Jump Host') {
+            steps {
+                echo "=== Testing SSH Connection via Jump Host ==="
+                sh """
+                    ssh -o StrictHostKeyChecking=no ${JUMP_HOST} \\
+                    'ssh -o StrictHostKeyChecking=no -i ~/.ssh/openstack_key.pem ${TARGET_USER}@${TARGET_HOST} "echo Connected!"'
+                """
+            }
+        }
+
+        stage('Run Placement Playbook') {
+            steps {
+                dir('ansible') {
+                    echo "=== Running Placement Playbook ==="
+                    sh """
+                        ansible-playbook -i inventory/inventory.ini playbooks/placement.yml \\
+                        -e "@group_vars/all.yml" \\
+                        -e "mariadb_root_password=rootpass placement_db_pass=placepass"
+                    """
                 }
             }
         }
 
-        stage('Déploiement Keystone') {
+        stage('Run Horizon Playbook') {
             steps {
-                dir('/home/nada/ci-cd') {
-                    sh '''
-                    echo "=== Déploiement Keystone ==="
-                    ansible-playbook -i ${INVENTORY} ansible/playbooks/keystone.yml
-                    '''
-                }
-            }
-        }
-
-        stage('Déploiement Placement') {
-            steps {
-                dir('/home/nada/ci-cd') {
-                    sh '''
-                    echo "=== Déploiement Placement ==="
-                    ansible-playbook -i ${INVENTORY} ansible/playbooks/placement.yml
-                    '''
-                }
-            }
-        }
-
-        stage('Déploiement Glance') {
-            steps {
-                dir('/home/nada/ci-cd') {
-                    sh '''
-                    echo "=== Déploiement Glance ==="
-                    ansible-playbook -i ${INVENTORY} ansible/playbooks/glance.yml
-                    '''
-                }
-            }
-        }
-
-        stage('Déploiement Horizon') {
-            steps {
-                dir('/home/nada/ci-cd') {
-                    sh '''
-                    echo "=== Déploiement Horizon ==="
-                    ansible-playbook -i ${INVENTORY} ansible/playbooks/horizon.yml
-                    '''
+                dir('ansible') {
+                    echo "=== Running Horizon Playbook ==="
+                    sh """
+                        ansible-playbook -i inventory/inventory.ini playbooks/horizon.yml \\
+                        -e "@group_vars/all.yml"
+                    """
                 }
             }
         }
     }
 
     post {
+        always {
+            echo "Pipeline finished. Check logs for details."
+        }
         success {
-            echo "✅ Déploiement OpenStack terminé avec succès."
+            echo "Placement + Horizon deployment succeeded ✅"
         }
         failure {
-            echo "❌ Échec du déploiement. Vérifie les logs Jenkins."
+            echo "Deployment failed ❌"
         }
     }
-}v
+}
+
