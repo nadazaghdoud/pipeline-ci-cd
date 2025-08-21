@@ -1,7 +1,8 @@
 ---
 
-- name: Reload Apache for dashboard
+- name: Restart Apache for Horizon
   systemd:
     name: apache2
-    state: reloaded
+    state: restarted
+    enabled: yes
 

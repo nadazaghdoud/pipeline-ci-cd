@@ -1,4 +1,5 @@
 ---
 horizon_package: openstack-dashboard
 horizon_config: /etc/openstack-dashboard/local_settings.py
-
+horizon_allowed_hosts: ['*']
+horizon_timezone: UTC

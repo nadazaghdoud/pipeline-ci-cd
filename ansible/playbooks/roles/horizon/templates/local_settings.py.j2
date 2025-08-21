@@ -1,13 +1,13 @@
-OPENSTACK_HOST = "controller"
+OPENSTACK_HOST = "{{ controller_hostname }}"
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = {{ horizon_allowed_hosts }}
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 
 CACHES = {
     'default': {
          'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-         'LOCATION': 'controller:11211',
+         'LOCATION': '{{ controller_hostname }}:11211',
     }
 }
 
@@ -34,5 +34,5 @@ OPENSTACK_NEUTRON_NETWORK = {
     'enable_fip_topology_check': False,
 }
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "{{ horizon_timezone }}"
 

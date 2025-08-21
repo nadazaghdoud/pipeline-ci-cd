@@ -20,3 +20,8 @@ os_auth:
   user_domain_name: Default
   project_domain_name: Default
 
+
+horizon_allowed_hosts:
+  - "*"
+horizon_timezone: "UTC"
+
