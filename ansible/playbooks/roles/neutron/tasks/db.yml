@@ -1,0 +1,14 @@
+---
+- name: Create Neutron database
+  mysql_db:
+    name: "{{ neutron_db_name }}"
+    state: present
+
+- name: Create Neutron database user
+  mysql_user:
+    name: "{{ neutron_db_user }}"
+    password: "{{ neutron_db_pass }}"
+    priv: "{{ neutron_db_name }}.*:ALL"
+    host_all: yes
+    state: present
+

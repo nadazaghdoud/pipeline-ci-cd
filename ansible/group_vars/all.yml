@@ -25,3 +25,27 @@ horizon_allowed_hosts:
   - "*"
 horizon_timezone: "UTC"
 
+
+neutron_db_name: neutron
+neutron_db_user: neutron
+neutron_db_pass: "neutronpass" 
+
+neutron_user: neutron
+neutron_pass: "neutronpass" 
+
+
+provider_network_name: provider
+provider_bridge: br0
+provider_interface: eth0
+overlay_interface_ip: "{{ controller_hostname }}"  
+vni_range_start: 1
+vni_range_end: 1000
+metadata_secret: "f06d771e64b4840d3d3e4fe87b4039c7"
+
+
+neutron_network_option: 2
+
+
+nova_user: "nova"
+nova_pass: "novapass"
+

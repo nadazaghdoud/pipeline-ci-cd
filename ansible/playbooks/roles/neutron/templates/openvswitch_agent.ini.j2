@@ -1,0 +1,13 @@
+[ovs]
+bridge_mappings = {{ provider_network_name }}:{{ provider_bridge }}
+local_ip = {{ overlay_interface_ip }}
+
+[agent]
+tunnel_types = vxlan
+l2_population = true
+
+[securitygroup]
+enable_security_group = true
+firewall_driver = openvswitch
+
+

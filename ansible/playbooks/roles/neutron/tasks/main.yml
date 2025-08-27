@@ -1,0 +1,21 @@
+---
+- name: Install Neutron packages
+  import_tasks: install.yml
+
+- name: Configure Neutron server
+  import_tasks: configure.yml
+
+- name: Create Neutron database
+  import_tasks: db.yml
+
+- name: Configure controller node
+  import_tasks: controller.yml
+  when: "'controller' in group_names"
+
+- name: Configure compute node
+  import_tasks: compute.yml
+  when: "'compute' in group_names"
+
+- name: Configure metadata agent
+  import_tasks: metadata.yml
+

@@ -1,0 +1,30 @@
+---
+
+neutron_db_name: neutron
+neutron_db_user: neutron
+neutron_db_pass: "{{ neutron_db_pass | default('neutronpass') }}"
+
+
+rabbit_user: openstack
+rabbit_pass: "{{ rabbitmq_password }}"
+
+
+neutron_user: neutron
+neutron_pass: "{{ neutron_pass | default('neutronpass') }}"
+region_name: "{{ keystone_region }}"
+project_name: service
+nova_user: "{{ nova_user }}"
+nova_pass: "{{ nova_password }}"
+
+
+provider_network_name: provider
+provider_bridge: br0
+provider_interface: eth0
+overlay_interface_ip: "{{ controller_hostname }}"  
+vni_range_start: 1
+vni_range_end: 1000
+metadata_secret: f06d771e64b4840d3d3e4fe87b4039c7
+
+
+neutron_network_option: 2  
+
