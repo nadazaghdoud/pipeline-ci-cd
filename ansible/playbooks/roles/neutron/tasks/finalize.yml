@@ -1,0 +1,79 @@
+---
+- name: Build OpenStack CLI env (controller)
+  set_fact:
+    _os_env:
+      OS_AUTH_URL: "{{ os_auth.auth_url }}"
+      OS_USERNAME: "{{ os_auth.username }}"
+      OS_PASSWORD: "{{ os_auth.password }}"
+      OS_PROJECT_NAME: "{{ os_auth.project_name }}"
+      OS_USER_DOMAIN_NAME: "{{ os_auth.user_domain_name }}"
+      OS_PROJECT_DOMAIN_NAME: "{{ os_auth.project_domain_name }}"
+      OS_IDENTITY_API_VERSION: "3"
+  when: "'controller' in group_names"
+
+- name: Populate Neutron DB (run on controller)
+  become: true
+  command: >
+    su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf
+    --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
+  when: "'controller' in group_names"
+
+- name: Restart controller Neutron services
+  service:
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  loop:
+    - neutron-server
+    - neutron-openvswitch-agent
+    - neutron-dhcp-agent
+    - neutron-metadata-agent
+    - neutron-l3-agent
+  when: "'controller' in group_names"
+
+- name: Restart compute agent services
+  service:
+    name: neutron-openvswitch-agent
+    state: restarted
+    enabled: yes
+  when: "'compute' in group_names"
+
+# Optional: provider network creation (CLI) - controlled by create_provider_network var
+- name: Check provider network exists (controller)
+  command: openstack network show {{ provider_network_name }}
+  environment: "{{ _os_env }}"
+  register: provider_net_check
+  failed_when: false
+  changed_when: false
+  when: "'controller' in group_names and create_provider_network | bool"
+
+- name: Create provider network (controller)
+  command: >
+    openstack network create --share --external --provider-physical-network {{ provider_network_name }}
+    --provider-network-type flat {{ provider_network_name }}
+  environment: "{{ _os_env }}"
+  when:
+    - "'controller' in group_names"
+    - create_provider_network | bool
+    - provider_net_check.rc != 0
+
+- name: Check provider subnet exists (controller)
+  command: openstack subnet show {{ provider_network_name }}
+  environment: "{{ _os_env }}"
+  register: provider_subnet_check
+  failed_when: false
+  changed_when: false
+  when: "'controller' in group_names and create_provider_network | bool"
+
+- name: Create provider subnet (controller)
+  command: >
+    openstack subnet create --network {{ provider_network_name }}
+    --allocation-pool start={{ provider_subnet_start }},end={{ provider_subnet_end }}
+    --dns-nameserver {{ provider_dns[0] }} --gateway {{ provider_gateway }}
+    --subnet-range {{ provider_subnet_cidr }} {{ provider_network_name }}
+  environment: "{{ _os_env }}"
+  when:
+    - "'controller' in group_names"
+    - create_provider_network | bool
+    - provider_subnet_check.rc != 0
+

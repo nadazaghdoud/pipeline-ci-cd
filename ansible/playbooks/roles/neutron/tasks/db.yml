@@ -3,6 +3,8 @@
   mysql_db:
     name: "{{ neutron_db_name }}"
     state: present
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
 
 - name: Create Neutron database user
   mysql_user:
@@ -11,4 +13,6 @@
     priv: "{{ neutron_db_name }}.*:ALL"
     host_all: yes
     state: present
-
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+s

@@ -1,4 +1,12 @@
 ---
+- name: Ensure Python deps for Neutron DB and OpenStack CLI
+  apt:
+    name:
+      - python3-pymysql
+      - python3-openstackclient
+    state: present
+    update_cache: yes
+
 - name: Install Neutron packages
   apt:
     name:
@@ -9,5 +17,5 @@
       - neutron-metadata-agent
       - "{{ 'neutron-l3-agent' if neutron_network_option == 2 and 'controller' in group_names else '' }}"
     state: present
-    update_cache: yes
+    update_cache: no
 

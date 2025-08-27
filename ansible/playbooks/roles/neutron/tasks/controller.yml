@@ -1,40 +1,95 @@
 ---
-- name: Create Neutron user in Keystone
-  openstack.cloud.user:
-    cloud: default
-    state: present
-    name: "{{ neutron_user }}"
-    password: "{{ neutron_pass }}"
-    domain: default
+- name: Ensure openstack CLI available (controller)
+  command: which openstack
+  register: openstack_cli
+  failed_when: openstack_cli.rc != 0
+  changed_when: false
+  when: "'controller' in group_names"
 
-- name: Assign admin role to Neutron user
-  openstack.cloud.role:
-    cloud: default
-    name: admin
-    user: "{{ neutron_user }}"
-    project: service
+- name: Check if neutron user exists
+  command: openstack user show {{ neutron_user }}
+  environment:
+    OS_AUTH_URL: "{{ os_auth.auth_url }}"
+    OS_USERNAME: "{{ os_auth.username }}"
+    OS_PASSWORD: "{{ os_auth.password }}"
+    OS_PROJECT_NAME: "{{ os_auth.project_name }}"
+    OS_USER_DOMAIN_NAME: "{{ os_auth.user_domain_name }}"
+    OS_PROJECT_DOMAIN_NAME: "{{ os_auth.project_domain_name }}"
+    OS_IDENTITY_API_VERSION: "3"
+  register: neutron_user_check
+  failed_when: false
+  changed_when: false
+  when: "'controller' in group_names"
 
-- name: Create Neutron service
-  openstack.cloud.service:
-    cloud: default
-    name: neutron
-    type: network
-    description: OpenStack Networking
+- name: Create Neutron user (if missing)
+  command: >
+    openstack user create --domain default --password {{ neutron_pass }} {{ neutron_user }}
+  environment:
+    OS_AUTH_URL: "{{ os_auth.auth_url }}"
+    OS_USERNAME: "{{ os_auth.username }}"
+    OS_PASSWORD: "{{ os_auth.password }}"
+    OS_PROJECT_NAME: "{{ os_auth.project_name }}"
+    OS_USER_DOMAIN_NAME: "{{ os_auth.user_domain_name }}"
+    OS_PROJECT_DOMAIN_NAME: "{{ os_auth.project_domain_name }}"
+    OS_IDENTITY_API_VERSION: "3"
+  when: neutron_user_check.rc != 0 and "'controller' in group_names"
 
-- name: Create Neutron endpoints
-  openstack.cloud.endpoint:
-    cloud: default
-    service: neutron
-    interface: "{{ item.interface }}"
-    url: "http://controller:9696"
-    region: "{{ region_name }}"
+- name: Add admin role to Neutron user (idempotent)
+  command: openstack role add --project service --user {{ neutron_user }} admin
+  environment:
+    OS_AUTH_URL: "{{ os_auth.auth_url }}"
+    OS_USERNAME: "{{ os_auth.username }}"
+    OS_PASSWORD: "{{ os_auth.password }}"
+    OS_PROJECT_NAME: "{{ os_auth.project_name }}"
+    OS_USER_DOMAIN_NAME: "{{ os_auth.user_domain_name }}"
+    OS_PROJECT_DOMAIN_NAME: "{{ os_auth.project_domain_name }}"
+    OS_IDENTITY_API_VERSION: "3"
+  register: neutron_role_add
+  failed_when: false
+  when: "'controller' in group_names"
+
+- name: Check if neutron service exists
+  command: openstack service show neutron
+  environment:
+    OS_AUTH_URL: "{{ os_auth.auth_url }}"
+    OS_USERNAME: "{{ os_auth.username }}"
+    OS_PASSWORD: "{{ os_auth.password }}"
+    OS_PROJECT_NAME: "{{ os_auth.project_name }}"
+    OS_USER_DOMAIN_NAME: "{{ os_auth.user_domain_name }}"
+    OS_PROJECT_DOMAIN_NAME: "{{ os_auth.project_domain_name }}"
+    OS_IDENTITY_API_VERSION: "3"
+  register: neutron_service_check
+  failed_when: false
+  changed_when: false
+  when: "'controller' in group_names"
+
+- name: Create Neutron service (if missing)
+  command: openstack service create --name neutron --description "OpenStack Networking" network
+  environment:
+    OS_AUTH_URL: "{{ os_auth.auth_url }}"
+    OS_USERNAME: "{{ os_auth.username }}"
+    OS_PASSWORD: "{{ os_auth.password }}"
+    OS_PROJECT_NAME: "{{ os_auth.project_name }}"
+    OS_USER_DOMAIN_NAME: "{{ os_auth.user_domain_name }}"
+    OS_PROJECT_DOMAIN_NAME: "{{ os_auth.project_domain_name }}"
+    OS_IDENTITY_API_VERSION: "3"
+  when: neutron_service_check.rc != 0 and "'controller' in group_names"
+
+- name: Create Neutron endpoints (public/internal/admin) - best-effort
+  command: >
+    openstack endpoint create --region {{ region_name }} network {{ item.interface }} http://{{ controller_hostname }}:9696
+  environment:
+    OS_AUTH_URL: "{{ os_auth.auth_url }}"
+    OS_USERNAME: "{{ os_auth.username }}"
+    OS_PASSWORD: "{{ os_auth.password }}"
+    OS_PROJECT_NAME: "{{ os_auth.project_name }}"
+    OS_USER_DOMAIN_NAME: "{{ os_auth.user_domain_name }}"
+    OS_PROJECT_DOMAIN_NAME: "{{ os_auth.project_domain_name }}"
+    OS_IDENTITY_API_VERSION: "3"
   loop:
     - { interface: 'public' }
     - { interface: 'internal' }
     - { interface: 'admin' }
-
-- name: Populate Neutron DB
-  command: >
-    su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf
-    --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
+  failed_when: false
+  when: "'controller' in group_names"
 

@@ -1,0 +1,31 @@
+---
+- name: Ensure br_netfilter module is loaded
+  modprobe:
+    name: br_netfilter
+    state: present
+  become: true
+  when: manage_provider_bridge | bool
+
+- name: Set sysctl for bridge netfilter
+  sysctl:
+    name: "{{ item }}"
+    value: 1
+    state: present
+    reload: yes
+  loop:
+    - net.bridge.bridge-nf-call-iptables
+    - net.bridge.bridge-nf-call-ip6tables
+  when: manage_provider_bridge | bool
+
+- name: Ensure OVS bridge exists
+  command: ovs-vsctl --may-exist add-br {{ provider_bridge }}
+  args:
+    warn: false
+  when: manage_provider_bridge | bool
+
+- name: Ensure provider interface is added to bridge
+  command: ovs-vsctl --may-exist add-port {{ provider_bridge }} {{ provider_interface }}
+  args:
+    warn: false
+  when: manage_provider_bridge | bool
+

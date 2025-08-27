@@ -1,0 +1,42 @@
+---
+- name: Ensure python openstacksdk is installed (controller)
+  apt:
+    name: python3-openstackclient
+    state: present
+  when: "'controller' in group_names"
+
+- name: Create provider network (external) via openstack.cloud
+  openstack.cloud.network:
+    state: present
+    name: "{{ provider_network_name }}"
+    external: yes
+    shared: yes
+    provider_physical_network: "{{ provider_network_name }}"
+    provider_network_type: flat
+    auth:
+      auth_url: "{{ os_auth.auth_url }}"
+      username: "{{ os_auth.username }}"
+      password: "{{ os_auth.password }}"
+      project_name: "{{ os_auth.project_name }}"
+      user_domain_name: "{{ os_auth.user_domain_name }}"
+      project_domain_name: "{{ os_auth.project_domain_name }}"
+  when: neutron_network_option in [1,2] and "'controller' in group_names"
+
+- name: Create provider subnet
+  openstack.cloud.subnet:
+    network_name: "{{ provider_network_name }}"
+    allocation_pool_start: "{{ provider_subnet_start | default('203.0.113.101') }}"
+    allocation_pool_end: "{{ provider_subnet_end | default('203.0.113.250') }}"
+    dns_nameservers: "{{ provider_dns | default(['8.8.4.4']) }}"
+    gateway_ip: "{{ provider_gateway | default('203.0.113.1') }}"
+    cidr: "{{ provider_subnet_cidr | default('203.0.113.0/24') }}"
+    ip_version: 4
+    auth:
+      auth_url: "{{ os_auth.auth_url }}"
+      username: "{{ os_auth.username }}"
+      password: "{{ os_auth.password }}"
+      project_name: "{{ os_auth.project_name }}"
+      user_domain_name: "{{ os_auth.user_domain_name }}"
+      project_domain_name: "{{ os_auth.project_domain_name }}"
+  when: neutron_network_option in [1,2] and "'controller' in group_names"
+

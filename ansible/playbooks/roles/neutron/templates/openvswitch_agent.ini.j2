@@ -1,13 +1,20 @@
 [ovs]
 bridge_mappings = {{ provider_network_name }}:{{ provider_bridge }}
+{% if neutron_network_option == 2 %}
 local_ip = {{ overlay_interface_ip }}
+{% endif %}
 
 [agent]
+{% if neutron_network_option == 2 %}
 tunnel_types = vxlan
 l2_population = true
+{% else %}
+# provider-only, no vxlan tunnels
+tunnel_types =
+l2_population = false
+{% endif %}
 
 [securitygroup]
 enable_security_group = true
 firewall_driver = openvswitch
-
 

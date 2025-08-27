@@ -1,12 +1,14 @@
 [ml2]
-type_drivers = flat,vlan,vxlan
-tenant_network_types = vxlan
-mechanism_drivers = openvswitch,l2population
+type_drivers = flat,vlan{% if neutron_network_option == 2 %},vxlan{% endif %}
+tenant_network_types = {% if neutron_network_option == 2 %}vxlan{% else %}{% endif %}
+mechanism_drivers = openvswitch{% if neutron_network_option == 2 %},l2population{% endif %}
 extension_drivers = port_security
 
 [ml2_type_flat]
 flat_networks = {{ provider_network_name }}
 
+{% if neutron_network_option == 2 %}
 [ml2_type_vxlan]
 vni_ranges = {{ vni_range_start }}:{{ vni_range_end }}
+{% endif %}
 

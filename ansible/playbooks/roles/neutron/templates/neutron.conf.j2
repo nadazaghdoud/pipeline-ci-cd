@@ -1,15 +1,15 @@
 [DEFAULT]
 core_plugin = ml2
-service_plugins = router
-transport_url = rabbit://{{ rabbit_user }}:{{ rabbit_pass }}@controller
+service_plugins = {{ 'router' if neutron_network_option == 2 else '' }}
+transport_url = rabbit://{{ rabbit_user }}:{{ rabbit_pass }}@{{ controller_hostname }}
 auth_strategy = keystone
 notify_nova_on_port_status_changes = true
 notify_nova_on_port_data_changes = true
 
 [keystone_authtoken]
-www_authenticate_uri = http://controller:5000
-auth_url = http://controller:5000
-memcached_servers = controller:11211
+www_authenticate_uri = http://{{ controller_hostname }}:5000
+auth_url = http://{{ controller_hostname }}:5000
+memcached_servers = {{ controller_hostname }}:11211
 auth_type = password
 project_domain_name = Default
 user_domain_name = Default
@@ -18,7 +18,7 @@ username = {{ neutron_user }}
 password = {{ neutron_pass }}
 
 [nova]
-auth_url = http://controller:5000
+auth_url = http://{{ controller_hostname }}:5000
 auth_type = password
 project_domain_name = Default
 user_domain_name = Default
@@ -30,6 +30,8 @@ password = {{ nova_pass }}
 [oslo_concurrency]
 lock_path = /var/lib/neutron/tmp
 
+{% if 'controller' in group_names %}
 [database]
-connection = mysql+pymysql://{{ neutron_db_user }}:{{ neutron_db_pass }}@controller/{{ neutron_db_name }}
+connection = mysql+pymysql://{{ neutron_db_user }}:{{ neutron_db_pass }}@{{ controller_hostname }}/{{ neutron_db_name }}
+{% endif %}
 
