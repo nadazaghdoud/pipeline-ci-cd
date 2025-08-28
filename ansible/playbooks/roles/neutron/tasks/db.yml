@@ -1,17 +1,27 @@
 ---
 - name: Create Neutron database
-  mysql_db:
+  community.mysql.mysql_db:
     name: "{{ neutron_db_name }}"
     state: present
     login_user: root
     login_password: "{{ mariadb_root_password }}"
 
-- name: Create Neutron database user
-  mysql_user:
+- name: Create Neutron database user (for localhost)
+  community.mysql.mysql_user:
     name: "{{ neutron_db_user }}"
     password: "{{ neutron_db_pass }}"
     priv: "{{ neutron_db_name }}.*:ALL"
-    host_all: yes
+    host: "localhost"
+    state: present
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+
+- name: Create Neutron database user (for remote connections)
+  community.mysql.mysql_user:
+    name: "{{ neutron_db_user }}"
+    password: "{{ neutron_db_pass }}"
+    priv: "{{ neutron_db_name }}.*:ALL"
+    host: "%"
     state: present
     login_user: root
     login_password: "{{ mariadb_root_password }}"

@@ -7,15 +7,19 @@
     state: present
     update_cache: yes
 
-- name: Install Neutron packages
+# Controller node packages
+- name: Install Neutron packages on controller
   apt:
-    name:
-      - neutron-server
-      - neutron-plugin-ml2
-      - neutron-openvswitch-agent
-      - neutron-dhcp-agent
-      - neutron-metadata-agent
-      - "{{ 'neutron-l3-agent' if neutron_network_option == 2 and 'controller' in group_names else '' }}"
+    name: "{{ neutron_controller_packages }}"
     state: present
-    update_cache: no
+    update_cache: yes
+  when: "'controller' in group_names"
+
+# Compute node packages
+- name: Install Neutron packages on compute
+  apt:
+    name: "{{ neutron_compute_packages }}"
+    state: present
+    update_cache: yes
+  when: "'compute' in group_names"
 

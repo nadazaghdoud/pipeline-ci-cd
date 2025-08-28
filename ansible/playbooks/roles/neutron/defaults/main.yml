@@ -36,3 +36,14 @@ provider_dns:
 manage_provider_bridge: false
 create_provider_network: false
 
+neutron_controller_packages:
+  - neutron-server
+  - neutron-plugin-ml2
+  - neutron-openvswitch-agent
+  - neutron-l3-agent
+  - neutron-dhcp-agent
+  - neutron-metadata-agent
+
+neutron_compute_packages:
+  - neutron-openvswitch-agent
+
