@@ -3,8 +3,8 @@
   community.mysql.mysql_db:
     name: "{{ neutron_db_name }}"
     state: present
-    login_user: root
-    login_password: "{{ mariadb_root_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  become: yes
   when: "'controller' in group_names"
 
 - name: Create Neutron database user (localhost)
@@ -14,8 +14,8 @@
     priv: "{{ neutron_db_name }}.*:ALL"
     host: "localhost"
     state: present
-    login_user: root
-    login_password: "{{ mariadb_root_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  become: yes
   when: "'controller' in group_names"
 
 - name: Create Neutron database user (remote)
@@ -25,7 +25,7 @@
     priv: "{{ neutron_db_name }}.*:ALL"
     host: "%"
     state: present
-    login_user: root
-    login_password: "{{ mariadb_root_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  become: yes
   when: "'controller' in group_names"
 
