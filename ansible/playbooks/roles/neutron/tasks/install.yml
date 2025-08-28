@@ -6,6 +6,7 @@
       - python3-openstackclient
     state: present
     update_cache: yes
+  become: yes
 
 # Controller node packages
 - name: Install Neutron packages on controller
@@ -13,6 +14,7 @@
     name: "{{ neutron_controller_packages }}"
     state: present
     update_cache: yes
+  become: yes
   when: "'controller' in group_names"
 
 # Compute node packages
@@ -21,5 +23,6 @@
     name: "{{ neutron_compute_packages }}"
     state: present
     update_cache: yes
+  become: yes
   when: "'compute' in group_names"
 
