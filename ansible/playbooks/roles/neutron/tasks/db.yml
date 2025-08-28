@@ -5,8 +5,9 @@
     state: present
     login_user: root
     login_password: "{{ mariadb_root_password }}"
+  when: "'controller' in group_names"
 
-- name: Create Neutron database user (for localhost)
+- name: Create Neutron database user (localhost)
   community.mysql.mysql_user:
     name: "{{ neutron_db_user }}"
     password: "{{ neutron_db_pass }}"
@@ -15,8 +16,9 @@
     state: present
     login_user: root
     login_password: "{{ mariadb_root_password }}"
+  when: "'controller' in group_names"
 
-- name: Create Neutron database user (for remote connections)
+- name: Create Neutron database user (remote)
   community.mysql.mysql_user:
     name: "{{ neutron_db_user }}"
     password: "{{ neutron_db_pass }}"
@@ -25,4 +27,5 @@
     state: present
     login_user: root
     login_password: "{{ mariadb_root_password }}"
+  when: "'controller' in group_names"
 
